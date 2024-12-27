@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Налаштування</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .settings-container {
+            width: 90%;
+            margin: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .settings-header {
+            text-align: center;
+        }
+        .settings-content {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .left-section, .right-section {
+            width: 48%;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        input[type="text"], input[type="number"], select, button, input[type="file"] {
+            display: block;
+            margin: 10px 0;
+            padding: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        input[type="file"]:disabled {
+            background-color: #f0f0f0;
+            border-color: #ccc;
+            cursor: not-allowed;
+        }
+        button {
+            background-color: #f0e2d0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div id="settings" class="settings-container">
+    <div class="settings-header">
+        <h2>Системні налаштування та Управління версіями</h2>
+    </div>
+    <div class="settings-content">
+        <div class="left-section">
+            <h3>Системні налаштування</h3>
+            <input type="text" placeholder="Назва проекту (EditText)">
+
+            <select id="inputOption">
+                <option value="local">Локально</option>
+                <option value="cloud">Хмарне сховище</option>
+                <option value="fileServer">На файл-сервері</option>
+            </select>
+
+            <input multiple type="file" id="fileInput" disabled>
+
+            <select>
+                <option>Локалізація пріоритетів</option>
+            </select>
+            <select>
+                <option>Локалізація індив. планів ННВ</option>
+            </select>
+        </div>
+        <div class="right-section">
+            <h3>Управління версіями</h3>
+            <label><input type="radio" name="calcOption"> Врахування стратегії виду НР</label>
+            <label><input type="radio" name="calcOption"> Перевірка модифік.. ПВД</label>
+            <input type="number" placeholder="Розмірн. масиву альтернатив">
+            <input type="text" placeholder="Норма годин на ставку">
+            <select>
+                <option>Послідовність розрахунку</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button>Скинути</button>
+        <button>Застосувати</button>
+    </div>
+
+
+
+</div>
+</body>
+</html>

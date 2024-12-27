@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проект</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .selector {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+        .selector span {
+            flex-grow: 1;
+            font-size: 14px;
+        }
+        .button-group {
+            display: flex;
+            margin: 10px 0;
+        }
+        .button-group button {
+            margin-right: 5px;
+            padding: 5px 10px;
+            background-color: #f0e2d0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        .button-group button.active {
+            background-color: #d8b89a;
+            opacity: 1;
+        }
+        .table-container, .settings-container, .strategies-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        .table-header, .table-body {
+            border: 1px solid #ccc;
+            padding: 5px;
+            text-align: center;
+        }
+        .table-header {
+            background-color: #f7f7f7;
+        }
+        .scrollable-content {
+            max-height: 85vh;
+            overflow-y: scroll;
+            border-top: 1px solid #ccc;
+            padding: 5px;
+        }
+        .filter-options {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .filter-options select {
+            padding: 5px;
+            margin-right: 5px;
+        }
+        .settings-container .settings-options, .settings-container .calculation-options {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+        }
+        .settings-options button, .calculation-options button {
+            padding: 5px 10px;
+            margin-top: 5px;
+            background-color: #f0e2d0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        .settings-container input[type="text"], .settings-container select, .settings-container input[type="number"] {
+            margin-bottom: 5px;
+            padding: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .settings-container .calculation-options {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .settings-container .calculation-options label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .strategies-options {
+            display: flex;
+            margin-bottom: 5px;
+        }
+        .strategies-options button {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #f0e2d0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        /* Additional styling for spacing */
+        .header, .footer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px;
+        }
+        .header select, .footer select {
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="selector">
+        <span>Селектор (опис проекту: назва проекту/назва гілки/вхідний файл/локалізація)</span>
+        <select>
+            <option>Опція 1</option>
+            <option>Опція 2</option>
+            <option>Опція 3</option>
+        </select>
+    </div>
+
+    <div class="button-group">
+        <button data-section="project" class="active">Проект</button>
+        <button data-section="settings">Налаштування</button>
+        <button disabled data-section="strategies">Стратегії</button>
+        <button disabled data-section="calculation">Розрахунок</button>
+        <button data-section="correction">Корекція</button>
+        <button data-section="help">Довідка</button>
+    </div>
+
+    <div id="content"></div> <!-- Контейнер для динамічного контенту -->
+
+</div>
+
+<script type="module" src="js/main.js"></script>
+<script type="module">
+
+    import { getEducationalLoad } from './js/main.js';
+
+    const mainProject = getEducationalLoad();
+    console.log("HTML загружен. Скрипт выполняется.");
+
+    function renderTableBody() {
+        const tableBody = document.getElementById('tableContent');
+
+        if (!tableBody) {
+            console.error('Элемент tableContent не найден');
+            return;
+        }
+
+        if (!mainProject) {
+            tableBody.innerHTML = '<p>Створити проект із назвою вхідного файлу. Інакше відредагуйте назву проекту.</p>';
+        }else{
+            tableBody.innerHTML = renderEducationalLoadTable(mainProject);
+        }
+
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM загружен');
+        renderTableBody();
+
+
+        const observer = new MutationObserver(() => {
+            const tableBody = document.getElementById('tableContent');
+            if (tableBody) {
+                console.log('Елемент tableContent з\'явився');
+                renderTableBody(); // Виклик функції, коли елемент з’являється
+                observer.disconnect(); // Зупиняємо спостереження
+            }
+        });
+
+        // Встановлюємо спостереження за всім тілом документа
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
+    const renderEducationalLoadTable = (data) => {
+        let tableHTML = '<table border="1" style="width: 100%; border-collapse: collapse;">';
+
+        // Table Header
+        tableHTML += `
+        <thead>
+            <tr>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Номер</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Назва дисципліни</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Кафедра</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Рівень освіти</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Курс</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Лекції</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Практичні</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Лабораторні</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Загальна кількість годин</th>
+            </tr>
+        </thead>
+    `;
+
+        // Table Body
+        tableHTML += '<tbody>';
+        data.forEach(row => {
+            tableHTML += `
+            <tr>
+                <td style="padding: 5px;">${row.Number}</td>
+                <td style="padding: 5px;">${row.EducationalDisciplinesAndTypesOfWork}</td>
+                <td style="padding: 5px;">${row.Department}</td>
+                <td style="padding: 5px;">${row['Educational level']}</td>
+                <td style="padding: 5px;">${row.Course}</td>
+                <td style="padding: 5px;">${row.Lectures || '—'}</td>
+                <td style="padding: 5px;">${row.PracticalClasses || '—'}</td>
+                <td style="padding: 5px;">${row.LaboratoryClasses || '—'}</td>
+                <td style="padding: 5px;">${row.Total || '—'}</td>
+            </tr>
+        `;
+        });
+        tableHTML += '</tbody></table>';
+
+        return tableHTML;
+    };
+</script>
+<script type="module">
+    import createMetaDataHandler from "./js/metaData/MetaDataHandler.js";
+    import {  ExcelToJsonParser } from './js/parser/ExcelToJsonParser.js';
+
+    import projectHandler from "./js/project/projectHandler.js";
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Спостерігач для fileInput
+        const observerFileInput = new MutationObserver(() => {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput) {
+                console.log('Елемент fileInput з\'явився');
+                fileInput.addEventListener('change', function () {
+                    const allowedExtensions = ['xlsx', 'json'];
+                    const fileName = this.value.split('\\').pop();
+                    const fileExtension = fileName.split('.').pop().toLowerCase();
+
+                    if (!allowedExtensions.includes(fileExtension)) {
+                        alert('Допустимі тільки файли формату .xlsx та .json!');
+                        this.value = '';
+                    }
+                });
+                observerFileInput.disconnect(); // Зупиняємо спостерігач
+            }
+        });
+
+        // Спостерігач для кнопки
+        const observerActionButton = new MutationObserver(() => {
+            const button = document.querySelector('.action-buttons button:last-child');
+
+            if (button) {
+                button.addEventListener('click', async function () {
+                    const fileInput = document.getElementById('fileInput');
+                    const projectNameInput = document.querySelector('.left-section input[type="text"]');
+
+                    if (!fileInput.files.length) {
+                        alert('Будь ласка, завантажте файли для створення проекту.');
+                        return;
+                    }
+
+                    const files = Array.from(fileInput.files);
+                    const excelFiles = files.filter(file => file.name.endsWith('.xlsx'));
+                    const jsonFiles = files.filter(file => file.name.endsWith('.json'));
+                    let parsedJson = null;
+
+                    if (jsonFiles.length > 0) {
+                        const jsonFile = jsonFiles[0];
+                        const reader = new FileReader();
+
+                        reader.onload = function(event) {
+                            const fileContent = event.target.result;
+                            parsedJson = JSON.parse(fileContent);
+                        };
+
+                        reader.readAsText(jsonFile);
+                    }
+
+                    if (!excelFiles.length && !jsonFiles.length) {
+                        alert('Допустимі тільки файли формату .xlsx та .json!');
+                        return;
+                    }
+
+                    const projectName = projectNameInput.value.trim() || excelFiles[0]?.name.split('.').slice(0, -1).join('.');
+
+
+                    const metaDataHandler = createMetaDataHandler();
+                    metaDataHandler.createMetaData(projectName);
+
+                    const metaData = metaDataHandler.getMetaData();
+
+                    let educationalLoadResult = []
+
+                    const parser = new ExcelToJsonParser();
+
+                    parser.parseExcel(excelFiles[0], (error, result) => {
+                        if (error) {
+                            console.error("Ошибка обработки:", error);
+                        } else {
+                            console.log("результат парсинга :", result);
+                            console.log("Тип переменной result:", typeof result);
+                            educationalLoadResult = result;
+                            console.log('educationalLoadResult!', educationalLoadResult);
+
+                            const projectData = {
+                                educationalLoad: result,
+                                metaData,
+                                votingFiles: parsedJson || ""
+                            };
+
+                            projectHandler.createEntity(projectData);
+
+                            console.log('Проект створено успішно!', projectHandler.getEntity());
+                        }
+                    });
+                    console.log('educationalLoadResult! after parsing ', educationalLoadResult);
+
+
+
+                });
+             //   observerActionButton.disconnect(); // Зупиняємо спостерігач
+            }
+        });
+
+
+
+        // Налаштування спостерігачів
+        observerFileInput.observe(document.body, { childList: true, subtree: true });
+        observerActionButton.observe(document.body, { childList: true, subtree: true });
+    });
+</script>
+<script type="module">
+    import projectHandler from "./js/project/projectHandler.js";
+
+    const tableHeader = document.getElementById('tableHeader');
+    let lastProjectName = null;
+    let firstUpdate = true;
+
+    if(tableHeader){
+        tableHeader.innerHTML = lastProjectName || "розподіл не проводився, перейдіть в налаштування";
+    } else {
+        console.log("tableHeader not found")
+    }
+
+    const updateTableHeader = () => {
+        const tableHeader = document.getElementById('tableHeader');
+        const projectName = projectHandler.getEntity()?.metadata?.project_name;
+
+
+        if (tableHeader) {
+
+            if (projectName !== lastProjectName) {
+                tableHeader.innerHTML = projectName || "розподіл не проводився, перейдіть в налаштування"; // Якщо проект не має назви, ставимо "bebra"
+                lastProjectName = projectName;
+            }
+        } else {
+            lastProjectName = projectName || "розподіл не проводився, перейдіть в налаштування";
+            firstUpdate = true
+            console.log("tableHeader відсутній, збережено значення:", lastProjectName);
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const observer = new MutationObserver(() => {
+            const tableHeader = document.getElementById('tableHeader');
+            const projectName = projectHandler.getEntity()?.metadata?.project_name;
+
+            if(tableHeader && lastProjectName && lastProjectName === projectName && firstUpdate){
+                firstUpdate = false;
+                tableHeader.innerHTML = lastProjectName;
+
+            }
+
+            if (tableHeader) {
+                console.log("Елемент tableHeader з'явився в DOM.");
+                updateTableHeader();
+            } else {
+                console.log("tableHeader відсутній, збережено значення:", projectName || "bebra");
+                lastProjectName = projectName || "bebra";
+                firstUpdate = true;
+            }
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+        document.addEventListener('projectNameChanged', updateTableHeader);
+    });
+
+
+    window.notifyProjectNameChange = function () {
+        const event = new Event('projectNameChanged');
+        document.dispatchEvent(event);
+    };
+</script>
+<script type="module">
+    import projectHandler from "./js/project/projectHandler.js";
+    import {DistributeCEL} from "./js/DELProcessor/GIPEL.js";
+    import {createPlans} from "./js/plan/PlanCreator.js";
+
+    const calculationButton = document.querySelector('button[data-section="calculation"]')
+    const strategiesButton = document.querySelector('button[data-section="strategies"]')
+
+    const setCalculationButtonDisabled=()=> {
+        const educationLoad = projectHandler.getEntity()?.educationalLoad
+        const votingFiles = projectHandler.getEntity()?.votingFiles
+        if (votingFiles?.length === 0 && educationLoad?.length === 0) return
+        if (!calculationButton) return;
+
+        calculationButton.disabled = false;
+    }
+
+    const calculationButtonHandler=()=>{
+        if( calculationButton?.textContent === "індивідуальні плани"){
+            const educationLoad = projectHandler.getEntity()?.educationalLoad
+            const teachers = projectHandler.getEntity()?.teachers
+            const distribution = projectHandler.getEntity()?.distributionResult
+
+            const plans = createPlans(educationLoad, teachers, distribution )
+
+            projectHandler.updateEntity({individualPlans: plans})
+            console.log('individ plans')
+        }else{
+            const educationLoad = projectHandler.getEntity()?.educationalLoad
+            const votingFiles = projectHandler.getEntity()?.votingFiles
+
+
+            if(votingFiles?.length && educationLoad?.length ){
+                const resultDistribute = DistributeCEL(educationLoad,votingFiles);
+                console.log("результат розподілу ",resultDistribute)
+                if(resultDistribute){
+                    projectHandler.updateEntity({distributionResult: resultDistribute})
+                    calculationButton.textContent = "індивідуальні плани"
+                    strategiesButton.disabled = false
+
+                    console.log('updated', projectHandler.getEntity())
+                }
+            }}
+
+    }
+
+
+
+    calculationButton.addEventListener('click',calculationButtonHandler )
+    document.addEventListener('votingFileChanged', setCalculationButtonDisabled);
+    document.addEventListener('educationLoadChanged', setCalculationButtonDisabled);
+
+    window.notifyVotingFileChange = function () {
+        const event = new Event('votingFileChanged');
+        document.dispatchEvent(event);
+    };
+
+    window.notifyEducationLoadChange = function () {
+        const event = new Event('educationLoadChanged');
+        document.dispatchEvent(event);
+    };
+
+    window.notifyDistributionResultChange = function () {
+        const event = new Event('distributionResultChanged');
+        document.dispatchEvent(event);
+    };
+
+    window.notifyIndividualPlansChange = function () {
+        const event = new Event('IndividualPlansChanged');
+        document.dispatchEvent(event);
+    };
+
+
+</script>
+<script type="module">
+    import projectHandler from "./js/project/projectHandler.js";
+
+    let firstRenderStrategies =true
+    let firstRenderProject=true
+
+    const initializeSelectorListener = () => {
+        const selector = document.getElementById('viewSelector');
+
+        if (selector) {
+            if(firstRenderProject){
+                updateTableContent()
+                firstRenderProject=false
+            }
+            selector.addEventListener('change', updateTableContent);
+        }
+    };
+
+    const updateProjectTableContent = () => {
+        const tableContent = document.getElementById('strategiesTable');
+        let tableHTML = '';
+        const distributionResult=projectHandler.getEntity().distributionResult
+        if(firstRenderStrategies){
+            if(distributionResult&&distributionResult.length){
+                tableHTML = renderDustrubutionResult(distributionResult)
+                firstRenderStrategies = false
+            }else{
+                tableHTML = '<p>дДаанніі відсутні</p>'
+            }
+
+            tableContent.innerHTML = tableHTML;
+        }
+
+    }
+
+
+    const updateTableContent = () => {
+        const selector = document.getElementById('viewSelector');
+
+        let tableHTML = '';
+
+        const tableContent = document.getElementById('tableContent');
+        const project = projectHandler.getEntity();
+
+        const selectedOption = selector?.value
+
+        if (selectedOption === 'educationalLoad') {
+            if (project.educationalLoad && project.educationalLoad.length > 0) {
+                tableHTML = renderEducationalLoadTable(project.educationalLoad)
+            } else {
+                tableHTML = '<p>Дані про навчальне навантаження відсутні.</p>';
+            }
+        } else if (selectedOption === 'individualPlans') {
+            if (project.individualPlans && Object.keys(project.individualPlans).length > 0) {
+                tableHTML = renderIndividualPlansTable(project.individualPlans);
+            } else {
+                tableHTML = '<p>Індивідуальні плани викладачів відсутні.</p>';
+            }
+        } else if (selectedOption === 'votingFiles') {
+            if (project.votingFiles && project.votingFiles.length > 0) {
+                tableHTML = renderDustrubutionResult(project.votingFiles)
+            } else {
+                tableHTML = '<p>Дані про структуру проекту відсутні.</p>';
+            }
+        }
+
+        tableContent.innerHTML = tableHTML;
+    };
+
+    const observer = new MutationObserver(() => {
+        const selector = document.getElementById('viewSelector');
+        if (!selector) firstRenderProject=true
+        if (selector) {
+            initializeSelectorListener();
+        }
+    });
+
+    const strategiesObserver = new MutationObserver(() => {
+        const selector = document.getElementById('strategies');
+        if(!selector) firstRenderStrategies = true
+        if (selector) {
+            strategiesInitListener();
+        }
+    });
+    const strategiesInitListener = () => {
+        const strategiesSelector = document.getElementById('strategies');
+        const tableContent = document.getElementById('strategiesTable');
+        if (strategiesSelector && tableContent) {
+            updateProjectTableContent()
+        }
+    }
+
+    observer.observe(document.body, { childList: true, subtree: true });
+    strategiesObserver.observe(document.body, { childList: true,subtree: true });
+
+    const renderDustrubutionResult = (data) => {
+        if (!data || data.length === 0) {
+            return '<p>Дані відсутні.</p>';
+        }
+
+        let tableHTML = '<table border="1" style="width: 100%; border-collapse: collapse;">';
+
+        // Заголовки таблиці
+        tableHTML += `
+        <thead>
+            <tr>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Назва дисципліни</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">ID дисципліни</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Лекції</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Практичні заняття</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Лабораторні</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Консультації</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Контрольні роботи</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Пріоритети викладачів</th>
+            </tr>
+        </thead>
+    `;
+
+        // Рядки таблиці
+        tableHTML += '<tbody>';
+        data.forEach((item) => {
+            tableHTML += `
+            <tr>
+                <td style="padding: 5px; text-align: left;">${item.subjectName || ''}</td>
+                <td style="padding: 5px; text-align: left;">${item.subjectId || ''}</td>
+                <td style="padding: 5px; text-align: left;">${item.Lectures || ''}</td>
+                <td style="padding: 5px; text-align: left;">${item.PracticalClasses || ''}</td>
+                <td style="padding: 5px; text-align: left;">${item.Laboratory || ''}</td>
+                <td style="padding: 5px; text-align: left;">${item.ConsultationsDuringTheSemester || ''}</td>
+                <td style="padding: 5px; text-align: left;">${item.ModuleControl || ''}</td>
+        `;
+
+            // Обробка масиву ownerTeacherId
+            if (item.ownerTeacherId && Array.isArray(item.ownerTeacherId)) {
+                const priorities = item.ownerTeacherId
+                    .map((teacher) => `ID: ${teacher.teacherId}, Пріоритет: ${teacher.priority}`)
+                    .join('<br>');
+                tableHTML += `<td style="padding: 5px; text-align: left;">${priorities}</td>`;
+            } else {
+                tableHTML += '<td style="padding: 5px; text-align: left;">—</td>';
+            }
+
+            tableHTML += '</tr>';
+        });
+        tableHTML += '</tbody></table>';
+
+        return tableHTML;
+    };
+
+    const renderIndividualPlansTable = (data) => {
+        if (!data || Object.keys(data).length === 0) {
+            return '<p>Дані відсутні.</p>';
+        }
+
+        let tableHTML = '';
+
+        Object.entries(data).forEach(([teacher, details]) => {
+            tableHTML += `<h3 style="margin-top: 20px;">Викладач: ${teacher}</h3>`;
+            tableHTML += '<table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">';
+
+            // Заголовки таблицы
+            tableHTML += '<thead><tr>';
+            tableHTML += '<th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Назва дисципліни</th>';
+            tableHTML += '<th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Лекції</th>';
+            tableHTML += '<th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Практичні заняття</th>';
+            tableHTML += '<th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Лабораторні</th>';
+            tableHTML += '<th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Консультації</th>';
+            tableHTML += '<th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Контрольні роботи</th>';
+            tableHTML += '<th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Екзамени</th>';
+            tableHTML += '</tr></thead>';
+
+            // Строки таблицы
+            tableHTML += '<tbody>';
+            details.subjects.forEach((subject) => {
+                tableHTML += '<tr>';
+                tableHTML += `<td style="padding: 5px; text-align: left;">${subject.subject || ''}</td>`;
+                tableHTML += `<td style="padding: 5px; text-align: left;">${subject.workload.Lectures || 0}</td>`;
+                tableHTML += `<td style="padding: 5px; text-align: left;">${subject.workload.PracticalClasses || 0}</td>`;
+                tableHTML += `<td style="padding: 5px; text-align: left;">${subject.workload.Laboratory || 0}</td>`;
+                tableHTML += `<td style="padding: 5px; text-align: left;">${subject.workload.ConsultationsDuringTheSemester || 0}</td>`;
+                tableHTML += `<td style="padding: 5px; text-align: left;">${subject.workload.ModuleControl || 0}</td>`;
+                tableHTML += `<td style="padding: 5px; text-align: left;">${subject.workload.Exams || 0}</td>`;
+                tableHTML += '</tr>';
+            });
+            tableHTML += '</tbody></table>';
+
+            // Суммарная нагрузка
+            tableHTML += '<table border="1" style="width: 50%; border-collapse: collapse; margin-top: 10px;">';
+            tableHTML += '<thead><tr>';
+            tableHTML += '<th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Тип роботи</th>';
+            tableHTML += '<th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Загальна кількість</th>';
+            tableHTML += '</tr></thead>';
+            tableHTML += '<tbody>';
+            Object.entries(details.totalWorkload).forEach(([workType, total]) => {
+                tableHTML += '<tr>';
+                tableHTML += `<td style="padding: 5px; text-align: left;">${workType}</td>`;
+                tableHTML += `<td style="padding: 5px; text-align: left;">${total || 0}</td>`;
+                tableHTML += '</tr>';
+            });
+            tableHTML += '</tbody></table>';
+        });
+
+        return tableHTML;
+    };
+
+    const renderEducationalLoadTable = (data) => {
+        let tableHTML = '<table border="1" style="width: 100%; border-collapse: collapse;">';
+
+        // Table Header
+        tableHTML += `
+        <thead>
+            <tr>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Номер</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Назва дисципліни</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Кафедра</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Рівень освіти</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Курс</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Лекції</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Практичні</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Лабораторні</th>
+                <th style="padding: 5px; background-color: #f7f7f7; text-align: left;">Загальна кількість годин</th>
+            </tr>
+        </thead>
+    `;
+
+        // Table Body
+        tableHTML += '<tbody>';
+        data.forEach(row => {
+            tableHTML += `
+            <tr>
+                <td style="padding: 5px;">${row.Number}</td>
+                <td style="padding: 5px;">${row.EducationalDisciplinesAndTypesOfWork}</td>
+                <td style="padding: 5px;">${row.Department}</td>
+                <td style="padding: 5px;">${row['Educational level']}</td>
+                <td style="padding: 5px;">${row.Course}</td>
+                <td style="padding: 5px;">${row.Lectures || '—'}</td>
+                <td style="padding: 5px;">${row.PracticalClasses || '—'}</td>
+                <td style="padding: 5px;">${row.LaboratoryClasses || '—'}</td>
+                <td style="padding: 5px;">${row.Total || '—'}</td>
+            </tr>
+        `;
+        });
+        tableHTML += '</tbody></table>';
+
+        return tableHTML;
+    };
+
+</script>
+
+<script type="module">
+    import projectHandler from "./js/project/projectHandler.js";
+
+    let priorities = [];
+    const headers = {
+        "Number": "Номер",
+        "EducationalDisciplinesAndTypesOfWork": "Навчальні дисципліни та види робіт",
+        "Department": "Кафедра",
+        "Educational level": "Освітній рівень",
+        "Plan number": "Номер плану",
+        "Course": "Курс",
+        "Number of students": "Кількість студентів",
+        "Number of streams": "Кількість потоків",
+        "Number of groups": "Кількість груп",
+        "Number of subgroups": "Кількість підгруп",
+        "Lectures (planned)": "Лекції (заплановані)",
+        "Practical classes (planned)": "Практичні заняття (заплановані)",
+        "Laboratory classes (planned)": "Лабораторні заняття (заплановані)",
+        "Internship (weeks)": "Практика (тижні)",
+        "Qualification works": "Кваліфікаційні роботи",
+        "Certification/State control": "Атестація/Державний контроль",
+        "Control work": "Контрольна робота",
+        "Number of credits": "Кількість кредитів",
+        "LecturesForDistribution": "Лекції",
+        "PracticalClassesForDistribution": "Практичні заняття",
+        "LaboratoryClassesForDistribution": "Лабораторні заняття",
+        "CourseWorksForDistribution": "Курсові роботи, проекти",
+        "ConsultationsDuringTheSemesterForDistribution": "Консультації протягом семестру",
+        "ModuleControlForDistribution": "Модульний контроль",
+        "ExamConsultationsForDistribution": "Консультації до екзамену",
+        "ExamsForDistribution": "Екзамени",
+        "InternshipForDistribution": "Практика",
+        "PostgraduateStudiesForDistribution": "Аспірантура",
+        "Total": "Всього"
+    };
+
+
+    const teacherDropdownObserver = new MutationObserver(() => {
+        const teacherDropdown = document.getElementById('teacherDropdown');
+        if (teacherDropdown && !teacherDropdown.innerHTML) {
+            populateTeacherDropdown();
+            teacherDropdown.addEventListener('change', () => {
+                displaySubjects();
+
+            });
+        }
+    });
+
+
+    teacherDropdownObserver.observe(document.body, { childList: true, subtree: true });
+
+
+    const subjectsTableObserver = new MutationObserver(() => {
+        const tableHead = document.getElementById('subjectsTableHead');
+        const tableBody = document.getElementById('subjectsTableBody');
+        if (tableHead && tableBody && !tableHead.innerHTML) {
+            displaySubjects();
+        }
+    });
+    subjectsTableObserver.observe(document.body, { childList: true, subtree: true });
+
+    const buttonsObserver = new MutationObserver(() => {
+        const saveButton = document.getElementById('saveCurrentPriorityForCorrection');
+        const deleteButton = document.getElementById('deleteButton');
+        const downloadButton = document.getElementById('downloadButton');
+
+        if (saveButton) saveButton.addEventListener('click', saveCurrentPriority);
+        if (deleteButton) deleteButton.addEventListener('click', clearPriority);
+        if (downloadButton) downloadButton.addEventListener('click', downloadPriorities);
+    });
+    buttonsObserver.observe(document.body, { childList: true, subtree: true });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        teacherDropdownObserver.observe(document.body, { childList: true, subtree: true });
+        subjectsTableObserver.observe(document.body, { childList: true, subtree: true });
+        buttonsObserver.observe(document.body, { childList: true, subtree: true });
+
+        populateTeacherDropdown();
+        displaySubjects();
+    });
+
+
+    function populateTeacherDropdown() {
+        const teacherDropdown = document.getElementById('teacherDropdown');
+        if (!teacherDropdown) return;
+
+        teacherDropdown.innerHTML = '';
+        projectHandler.getEntity()?.teachers.forEach(teacher => {
+            const option = document.createElement('option');
+            option.value = teacher.NamberKey;
+            option.textContent = teacher.TeacherName;
+            teacherDropdown.appendChild(option);
+        });
+    }
+
+    function displaySubjects() {
+        const tableHead = document.getElementById('subjectsTableHead');
+        const tableBody = document.getElementById('subjectsTableBody');
+        if (!tableHead || !tableBody) return;
+
+        tableHead.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        const headerRow = document.createElement('tr');
+        Object.values(headers).forEach(header => {
+            const th = document.createElement('th');
+            th.textContent = header;
+            headerRow.appendChild(th);
+        });
+        headerRow.appendChild(document.createElement('th')).textContent = "Teacher Priority";
+        headerRow.appendChild(document.createElement('th')).textContent = "Head Priority";
+        tableHead.appendChild(headerRow);
+
+        projectHandler.getEntity()?.educationalLoad.forEach((subject, index) => {
+            const row = document.createElement('tr');
+            row.setAttribute('data-subject-id', subject.Number); // Set subject ID
+
+            Object.keys(headers).forEach(key => {
+                const cell = document.createElement('td');
+                cell.textContent = subject[key] || "-";
+                row.appendChild(cell);
+            });
+
+            const teacherPriorityCell = document.createElement('td');
+            teacherPriorityCell.appendChild(createPriorityDropdown(index, 'teacher'));
+            row.appendChild(teacherPriorityCell);
+
+            const headPriorityCell = document.createElement('td');
+            headPriorityCell.appendChild(createPriorityDropdown(index, 'head'));
+            row.appendChild(headPriorityCell);
+
+            tableBody.appendChild(row);
+        });
+    }
+
+    function createPriorityDropdown(index, type) {
+        const select = document.createElement('select');
+        select.dataset.type = type;
+
+        for (let i = 1; i <= 10; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            select.appendChild(option);
+        }
+
+        select.addEventListener('change', function () {
+            document.getElementById('saveCurrentPriorityForCorrection').disabled = false;
+        });
+
+        return select;
+    }
+
+    function saveCurrentPriority() {
+        const tableBody = document.getElementById('subjectsTableBody');
+        const rows = tableBody.getElementsByTagName('tr');
+
+        for (const row of rows) {
+            const teacherPriority = row.querySelector('select[data-type="teacher"]').value;
+            const headPriority = row.querySelector('select[data-type="head"]').value;
+            const subjectId = row.getAttribute('data-subject-id');
+            const teacherId = document.getElementById('teacherDropdown').value;
+            const subjectName = row.querySelectorAll('td')[1];
+
+            if ((teacherPriority && teacherPriority !== "1") || (headPriority && headPriority !== "1")) {
+                priorities.push({
+                    subjectName: subjectName.textContent.trim(),
+                    teacherId: teacherId,
+                    subjectId: subjectId,
+                    teacherPriority: teacherPriority,
+                    headPriority: headPriority
+                });
+            }
+        }
+        document.getElementById('UpdateVotingFilesForCorrection').disabled = false;
+        document.getElementById('deleteButtonClearPriorities').disabled = false;
+        console.log("priorities ", priorities);
+    }
+
+    function clearPriority() {
+        priorities = [];
+        displaySubjects();
+        document.getElementById('downloadButton').disabled = true;
+        document.getElementById('saveButton').disabled = true;
+        document.getElementById('deleteButton').disabled = true;
+    }
+
+    function downloadPriorities() {
+        projectHandler.updateEntity({votingFiles: priorities})
+        console.log("project after downloadPriorities", projectHandler.getEntity())
+
+        const calculationButton = document.querySelector('button[data-section="calculation"]')
+        const updateVoitingFiles = document.getElementById("UpdateVotingFilesForCorrection")
+
+        if(calculationButton){
+            console.log("calculationButton в последнем скрипте есть ", calculationButton)
+        }
+
+        const changeCalculationButtonName=()=>{
+            if( calculationButton?.textContent === "індивідуальні плани"){
+                 calculationButton.textContent = "розрахунок"
+            }
+
+        }
+
+        updateVoitingFiles.addEventListener('click', changeCalculationButtonName )
+
+
+    }
+
+
+    window.downloadPriorities = downloadPriorities;
+
+</script>
+
+
+<script type="module">
+    import projectHandler from "./js/project/projectHandler.js";
+    import downloadExcelHandler from "./js/parser/JsonToExcelParser.js";
+
+
+    const downloadBowdlerisation = () => {
+        const individualPlans = projectHandler.getEntity()?.individualPlans
+        downloadExcelHandler(individualPlans)
+        console.log("download exel ")
+    }
+
+    const downloadExelObserver = new MutationObserver(() => {
+        const downloadExelButton = document.getElementById('DownloadExel');
+        const selectorForProjectView = document.getElementById('viewSelector');
+
+
+        if (selectorForProjectView) {
+
+
+            selectorForProjectView.addEventListener('change' , event => {
+                if(selectorForProjectView.value === "individualPlans"){
+
+                    downloadExelButton.disabled = false;
+                    downloadExelButton.addEventListener('click', downloadBowdlerisation) ;
+                } else {
+                    downloadExelButton.disabled = true;
+                    downloadExelButton.removeEventListener("click", downloadBowdlerisation)
+                }
+            })
+
+        }
+    });
+
+
+    downloadExelObserver.observe(document.body, { childList: true, subtree: true });
+</script>
+
+
+
+
+</body>
+</html>
